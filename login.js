@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; // Ícones para o login
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
+  // Valida o formato do email
   const validarEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
   };
 
-  const handleLogin = () => {
+  // Lida com o login
+  const handleLogin = async () => {
     if (!validarEmail(email)) {
       Alert.alert('Erro', 'Por favor, insira um email válido.');
       return;
@@ -21,8 +23,25 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    // Lógica para o login...
-    Alert.alert('Sucesso', 'Login realizado com sucesso!');
+    try {
+      const response = await fetch('http://192.168.15.3:5001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        Alert.alert('Sucesso', `Bem-vinda, ${data.nickname}!`);
+        navigation.navigate('InformacoesIniciais'); // Redireciona para Informações Iniciais
+      } else {
+        const error = await response.json();
+        Alert.alert('Erro', error.message || 'Credenciais inválidas.');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    }
   };
 
   return (
@@ -32,16 +51,18 @@ const Login = ({ navigation }) => {
         style={styles.icon}
       />
       <Text style={styles.title}>Seja bem-vinda de volta!</Text>
-      
-      <Text style={styles.label}>email:</Text>
+
+      <Text style={styles.label}>Email:</Text>
       <TextInput
         placeholder="Digite seu e-mail..."
         style={styles.input}
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
-      <Text style={styles.label}>senha:</Text>
+      <Text style={styles.label}>Senha:</Text>
       <TextInput
         placeholder="Digite sua senha..."
         style={styles.input}
@@ -50,7 +71,7 @@ const Login = ({ navigation }) => {
         onChangeText={setSenha}
       />
 
-      <TouchableOpacity onPress={() => Alert.alert('Redirecionar para recuperação de senha...')}>
+      <TouchableOpacity onPress={() => navigation.navigate('RecuperarSenha')}>
         <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
       </TouchableOpacity>
 
@@ -60,8 +81,7 @@ const Login = ({ navigation }) => {
 
       <Text style={styles.orText}>ou</Text>
 
-      <Text style={styles.loginWithText}>Entre com :</Text>
-      
+      <Text style={styles.loginWithText}>Entre com:</Text>
       <View style={styles.socialContainer}>
         <TouchableOpacity style={styles.iconButton}>
           <MaterialIcons name="email" size={32} color="#7a7a7a" />
@@ -73,6 +93,10 @@ const Login = ({ navigation }) => {
           <FontAwesome name="google" size={32} color="#7a7a7a" />
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity onPress={() => navigation.navigate('Cadastro')} style={styles.linkContainer}>
+        <Text style={styles.linkText}>Não tem uma conta? Cadastre-se aqui</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -149,6 +173,15 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 10,
+  },
+  linkContainer: {
+    marginTop: 20,
+  },
+  linkText: {
+    textDecorationLine: 'underline',
+    color: '#3AA6B9',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

@@ -1,17 +1,22 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, Image } from 'react-native';
 
 const Home = ({ navigation }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigation.replace('Login');
+    }, 3000);
+
+    return () => clearTimeout(timer); 
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
       <Image
         source={require('./assets/lunalogo.png')}
         style={styles.icon}
       />
-      <Text style={styles.title}>Luna</Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Cadastro')}>
-        <Text style={styles.buttonText}>Cadastre-se</Text>
-      </TouchableOpacity>
+      <Text style={styles.title}>Bem-vinda ao Luna</Text>
     </View>
   );
 };
@@ -30,22 +35,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: 'SortsMillGoudy',
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: '#0000005C', 
-    borderRadius: 5,
-    padding: 10,
-    width: '80%',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#fff', 
-    fontWeight: 'bold',
-    fontSize: 18,
+    color: '#3AA6B9',
   },
 });
 

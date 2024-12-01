@@ -7,17 +7,20 @@ const Cadastro = ({ navigation }) => {
   const [senha, setSenha] = useState('');
   const [termosAceitos, setTermosAceitos] = useState(false);
 
+  // Função para validar o email
   const validarEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
   };
 
+  // Função para validar a senha
   const validarSenha = (senha) => {
     const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; 
     return re.test(senha);
   };
 
-  const handleCadastro = () => {
+  // Função para lidar com o cadastro
+  const handleCadastro = async () => {
     if (!nome) {
       Alert.alert('Erro', 'Por favor, insira seu nome.');
       return;
@@ -35,9 +38,32 @@ const Cadastro = ({ navigation }) => {
       return;
     }
 
-    Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-    
-    navigation.navigate('InformacoesIniciais');
+    try {
+      const response = await fetch('http://localhost:5001/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nickname: nome, // "nickname" é o campo esperado no backend
+          email,
+          senha,
+          avatar: 'avatar1.png', // Valor padrão temporário
+          ciclo: 'folicular', // Valor padrão temporário
+          intensidade: 'Moderado', // Valor padrão temporário
+          tiposTreino: ['Cardio'], // Valor padrão temporário
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+        navigation.navigate('Login'); // Redireciona para a tela de login
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Erro', errorData.message || 'Erro ao realizar cadastro.');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    }
   };
 
   return (
@@ -145,4 +171,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Cadastro; 
+export default Cadastro;

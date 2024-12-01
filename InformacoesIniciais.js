@@ -1,15 +1,117 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TextInput, Image, TouchableOpacity, Platform, Alert } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const InformacoesIniciais = () => {
+const InformacoesIniciais = ({ navigation }) => {
+  const [dataNascimento, setDataNascimento] = useState('');
+  const [peso, setPeso] = useState('');
+  const [altura, setAltura] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDate, setTempDate] = useState(new Date());
+
+  // Manipula a mudança de data
+  const handleDateChange = (event, selectedDate) => {
+    if (event.type === 'set' && selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+      setDataNascimento(formattedDate);
+    }
+    setShowDatePicker(false);
+  };
+
+  // Envia os dados ao backend
+  const enviarDados = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dataNascimento,
+          peso,
+          altura,
+          // Campos temporários preenchidos com valores padrão
+          nickname: 'Usuária',
+          avatar: 'avatar1.png',
+          ciclo: 'folicular',
+          intensidade: 'Moderado',
+          tiposTreino: ['Cardio'],
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Sucesso', 'Informações salvas com sucesso!');
+        navigation.navigate('UltimoCiclo'); // Navega para a próxima tela
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Erro', errorData.message || 'Não foi possível salvar os dados.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+      console.error(error);
+    }
+  };
+
+  // Valida os dados antes de avançar
+  const handleAvancar = () => {
+    if (!dataNascimento || !peso || !altura) {
+      Alert.alert('Erro', 'Por favor, preencha todas as informações.');
+      return;
+    }
+    enviarDados();
+  };
+
   return (
     <View style={styles.container}>
-        <Image
-        source={require('./assets/ciclito.png')}
-        style={styles.icon}
-      />
+      <Image source={require('./assets/ciclito.png')} style={styles.icon} />
       <Text style={styles.title}>Olá, eu sou o Ciclito!</Text>
-      <Text style={styles.subtitle}>Para começarmos, preciso saber algumas informações sobre você:</Text>
+      <Text style={styles.subtitle}>
+        Para começarmos, preciso saber algumas informações sobre você:
+      </Text>
+
+      {/* Campo de Data de Nascimento */}
+      <Text style={styles.label}>Qual sua data de nascimento?</Text>
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateInput}>
+        <Text style={styles.dateText}>{dataNascimento || 'Selecione uma data'}</Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={tempDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          onChange={handleDateChange}
+          maximumDate={new Date()}
+        />
+      )}
+
+      {/* Campo de Peso */}
+      <Text style={styles.label}>Qual seu peso atual?</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 60"
+          value={peso}
+          onChangeText={setPeso}
+          keyboardType="numeric"
+        />
+        <Text style={styles.unit}>kg</Text>
+      </View>
+
+      {/* Campo de Altura */}
+      <Text style={styles.label}>Qual sua altura?</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 165"
+          value={altura}
+          onChangeText={setAltura}
+          keyboardType="numeric"
+        />
+        <Text style={styles.unit}>cm</Text>
+      </View>
+
+      {/* Botão Avançar */}
+      <TouchableOpacity style={styles.button} onPress={handleAvancar}>
+        <Text style={styles.buttonText}>Avançar</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -20,6 +122,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F6F7FC',
+    paddingHorizontal: 20,
+  },
+  icon: {
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -32,6 +141,59 @@ const styles = StyleSheet.create({
     color: '#3AA6B9',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    color: '#3AA6B9',
+    alignSelf: 'flex-start',
+    marginBottom: 5,
+  },
+  dateInput: {
+    width: '80%',
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  dateText: {
+    color: '#7a7a7a',
+    textAlign: 'center',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  input: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  unit: {
+    fontSize: 16,
+    color: '#3AA6B9',
+    marginLeft: 10,
+  },
+  button: {
+    backgroundColor: '#3AA6B9',
+    borderRadius: 5,
+    padding: 15,
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });
 
