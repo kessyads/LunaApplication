@@ -13,25 +13,29 @@ import RotinaTreinos from './RotinaTreinos';
 import AtividadeFisica from './AtividadeFisica';
 import ConfiguracaoPerfil from './ConfiguracaoPerfil';
 import TelaAguarde from './TelaAguarde';
+import DashboardCiclo from './DashboardCiclo';
+import TreinoRecomendado from './TreinoRecomendado';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Cadastro" component={Cadastro} />
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="RecuperarSenha" component={RecuperarSenha} />
-        <Stack.Screen name="InformacoesIniciais" component={InformacoesIniciais} />
-        <Stack.Screen name="UltimoCiclo" component={UltimoCiclo} />
-        <Stack.Screen name="Regularidade" component={Regularidade}/>
-        <Stack.Screen name="MetodoContraceptivo" component={MetodoContraceptivo}/>
-        <Stack.Screen name="RotinaTreinos" component={RotinaTreinos}/>
-        <Stack.Screen name="AtividadeFisica" component={AtividadeFisica}/>
-        <Stack.Screen name="ConfiguracaoPerfil" component={ConfiguracaoPerfil}/>
-        <Stack.Screen name="TelaAguarde" component={TelaAguarde}/>
+      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: true }}>
+        <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+        <Stack.Screen name="Cadastro" component={Cadastro} options={{ title: 'Cadastro' }} />
+        <Stack.Screen name="Login" component={Login} options={{ title: 'Login' }} />
+        <Stack.Screen name="RecuperarSenha" component={RecuperarSenha} options={{ title: 'Recuperar Senha' }} />
+        <Stack.Screen name="InformacoesIniciais" component={InformacoesIniciais} options={{ title: 'Informações Iniciais' }} />
+        <Stack.Screen name="UltimoCiclo" component={UltimoCiclo} options={{ title: 'Último Ciclo' }} />
+        <Stack.Screen name="Regularidade" component={Regularidade} options={{ title: 'Regularidade' }} />
+        <Stack.Screen name="MetodoContraceptivo" component={MetodoContraceptivo} options={{ title: 'Método Contraceptivo' }} />
+        <Stack.Screen name="RotinaTreinos" component={RotinaTreinos} options={{ title: 'Rotina de Treinos' }} />
+        <Stack.Screen name="AtividadeFisica" component={AtividadeFisica} options={{ title: 'Atividade Física' }} />
+        <Stack.Screen name="ConfiguracaoPerfil" component={ConfiguracaoPerfil} options={{ title: 'Configuração de Perfil' }} />
+        <Stack.Screen name="TelaAguarde" component={TelaAguarde} options={{ title: 'Aguarde' }} />
+        <Stack.Screen name="DashboardCiclo" component={DashboardCiclo} options={{ title: 'Seu Ciclo' }} />
+        <Stack.Screen name="TreinoRecomendado" component={TreinoRecomendado} options={{ title: 'Treino Recomendado' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -6,14 +6,12 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  // Valida o formato do email
   const validarEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
   };
 
-  // Lida com o login
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!validarEmail(email)) {
       Alert.alert('Erro', 'Por favor, insira um email válido.');
       return;
@@ -23,24 +21,12 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    try {
-      const response = await fetch('http://192.168.15.3:5001/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        Alert.alert('Sucesso', `Bem-vinda, ${data.nickname}!`);
-        navigation.navigate('InformacoesIniciais'); // Redireciona para Informações Iniciais
-      } else {
-        const error = await response.json();
-        Alert.alert('Erro', error.message || 'Credenciais inválidas.');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+    // Simulação de login
+    if (email === "teste@exemplo.com" && senha === "123456") {
+      Alert.alert('Sucesso', 'Login realizado com sucesso!');
+      navigation.navigate('InformacoesIniciais');
+    } else {
+      Alert.alert('Erro', 'Credenciais inválidas. Tente novamente.');
     }
   };
 

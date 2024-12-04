@@ -6,7 +6,7 @@ const UltimoCiclo = ({ navigation }) => {
   const [dataSelecionada, setDataSelecionada] = useState(null);
   const [naoLembro, setNaoLembro] = useState(false);
 
-  const hoje = new Date().toISOString().split('T')[0]; // Data de hoje no formato ISO (YYYY-MM-DD)
+  const hoje = new Date().toISOString().split('T')[0]; 
 
   const handleValidar = () => {
     if (!dataSelecionada && !naoLembro) {
@@ -45,7 +45,7 @@ const UltimoCiclo = ({ navigation }) => {
           arrowColor: '#3AA6B9',
           todayTextColor: '#3AA6B9',
         }}
-        maxDate={hoje} // Impede a seleção de datas futuras
+        maxDate={hoje} 
       />
 
       {/* Switch */}
@@ -54,7 +54,7 @@ const UltimoCiclo = ({ navigation }) => {
           value={naoLembro}
           onValueChange={(newValue) => {
             setNaoLembro(newValue);
-            if (newValue) setDataSelecionada(null); // Desmarca a data se "Não me lembro" for selecionado
+            if (newValue) setDataSelecionada(null);   
           }}
           thumbColor={naoLembro ? '#3AA6B9' : '#ccc'}
           trackColor={{ false: '#ccc', true: '#a3dbe9' }}

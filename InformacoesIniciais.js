@@ -18,45 +18,16 @@ const InformacoesIniciais = ({ navigation }) => {
     setShowDatePicker(false);
   };
 
-  // Envia os dados ao backend
-  const enviarDados = async () => {
-    try {
-      const response = await fetch('http://localhost:5001/api/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dataNascimento,
-          peso,
-          altura,
-          // Campos temporários preenchidos com valores padrão
-          nickname: 'Usuária',
-          avatar: 'avatar1.png',
-          ciclo: 'folicular',
-          intensidade: 'Moderado',
-          tiposTreino: ['Cardio'],
-        }),
-      });
-
-      if (response.ok) {
-        Alert.alert('Sucesso', 'Informações salvas com sucesso!');
-        navigation.navigate('UltimoCiclo'); // Navega para a próxima tela
-      } else {
-        const errorData = await response.json();
-        Alert.alert('Erro', errorData.message || 'Não foi possível salvar os dados.');
-      }
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
-      console.error(error);
-    }
-  };
-
   // Valida os dados antes de avançar
   const handleAvancar = () => {
     if (!dataNascimento || !peso || !altura) {
       Alert.alert('Erro', 'Por favor, preencha todas as informações.');
       return;
     }
-    enviarDados();
+
+    // Simula o envio dos dados
+    Alert.alert('Sucesso', 'Informações salvas com sucesso!');
+    navigation.navigate('UltimoCiclo'); // Avança para a próxima tela
   };
 
   return (

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const ConfiguracaoPerfil = ({ navigation }) => {
   const [nickname, setNickname] = useState('');
@@ -9,8 +10,25 @@ const ConfiguracaoPerfil = ({ navigation }) => {
     require('./assets/opcao1.png'),
     require('./assets/opcao2.png'),
     require('./assets/opcao3.png'),
-    require('./assets/maisopcoes.png'),
   ];
+
+  const abrirGaleria = () => {
+    const options = {
+      mediaType: 'photo',
+    };
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('Usuária cancelou a escolha de imagem');
+      } else if (response.errorCode) {
+        console.error('Erro ao abrir galeria: ', response.errorMessage);
+      } else {
+        if (response.assets && response.assets.length > 0) {
+          const { uri } = response.assets[0];
+          setAvatarSelecionado({ uri });
+        }
+      }
+    });
+  };
 
   const handleConfirmar = () => {
     if (!nickname || !nickname.match(/^[a-zA-Z0-9-_]+$/)) {
@@ -23,7 +41,7 @@ const ConfiguracaoPerfil = ({ navigation }) => {
     }
 
     Alert.alert('Sucesso', 'Perfil configurado com sucesso!');
-    navigation.navigate('TelaAguarde'); // Próxima tela
+    navigation.navigate('TelaAguarde'); 
   };
 
   return (
@@ -45,6 +63,12 @@ const ConfiguracaoPerfil = ({ navigation }) => {
             <Image source={avatar} style={styles.avatarImage} />
           </TouchableOpacity>
         ))}
+        {/* Botão para acessar a galeria */}
+        <TouchableOpacity onPress={abrirGaleria} style={styles.avatarButton}>
+          <View style={styles.maisOpcoesContainer}>
+            <Text style={styles.maisOpcoesText}>+</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
       {/* Nickname Input */}
@@ -111,6 +135,19 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     resizeMode: 'contain',
+  },
+  maisOpcoesContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#3AA6B9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  maisOpcoesText: {
+    fontSize: 36,
+    color: '#3AA6B9',
   },
   input: {
     width: '80%',

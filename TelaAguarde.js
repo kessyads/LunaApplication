@@ -3,13 +3,9 @@ import { StyleSheet, View, Text, Image, ActivityIndicator } from 'react-native';
 
 const TelaAguarde = ({ navigation }) => {
   useEffect(() => {
-    // Simula carregamento e navegação após 3 segundos
-    const timer = setTimeout(() => {
-      navigation.navigate('TelaFinal'); // Substitua por sua próxima tela
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    navigation.navigate('DashboardCiclo');
   }, [navigation]);
+
 
   return (
     <View style={styles.container}>
