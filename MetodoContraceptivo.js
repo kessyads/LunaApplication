@@ -1,10 +1,24 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app'; 
 
 const MetodoContraceptivo = ({ navigation }) => {
-  const handleSelection = (metodo) => {
+  const handleSelection = async (metodo) => {
     Alert.alert('Método selecionado', `Você selecionou: ${metodo}`);
-    navigation.navigate('RotinaTreinos'); 
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      await axios.post(`${BASE_URL}/health/update`, {
+        userId,
+        metodoContraceptivo: metodo,
+      });
+      navigation.navigate('RotinaTreinos');
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao registrar o método contraceptivo. Tente novamente.');
+      console.error('Erro ao registrar o método contraceptivo:', error);
+    }
   };
 
   return (

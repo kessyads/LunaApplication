@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app/api/user';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -11,7 +14,7 @@ const Login = ({ navigation }) => {
     return re.test(String(email).toLowerCase());
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validarEmail(email)) {
       Alert.alert('Erro', 'Por favor, insira um email válido.');
       return;
@@ -21,21 +24,30 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    // Simulação de login
-    if (email === "teste@exemplo.com" && senha === "123456") {
-      Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('InformacoesIniciais');
-    } else {
+    try {
+      const response = await axios.post(`${BASE_URL}/login`, {
+        email: email.toLowerCase(),
+        senha,
+      });
+
+      if (response.status === 200) {
+        const { nickname, avatar } = response.data;
+
+        await AsyncStorage.setItem('nickname', nickname);
+        await AsyncStorage.setItem('avatar', avatar);
+
+        Alert.alert('Sucesso', 'Login realizado com sucesso!');
+        navigation.navigate('DashboardCiclo');
+      }
+    } catch (error) {
       Alert.alert('Erro', 'Credenciais inválidas. Tente novamente.');
+      console.error('Erro ao fazer login:', error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('./assets/lunalogo.png')}
-        style={styles.icon}
-      />
+      <Image source={require('./assets/lunalogo.png')} style={styles.icon} />
       <Text style={styles.title}>Seja bem-vinda de volta!</Text>
 
       <Text style={styles.label}>Email:</Text>
@@ -64,21 +76,6 @@ const Login = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
-
-      <Text style={styles.orText}>ou</Text>
-
-      <Text style={styles.loginWithText}>Entre com:</Text>
-      <View style={styles.socialContainer}>
-        <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="email" size={32} color="#7a7a7a" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="phone" size={32} color="#7a7a7a" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <FontAwesome name="google" size={32} color="#7a7a7a" />
-        </TouchableOpacity>
-      </View>
 
       <TouchableOpacity onPress={() => navigation.navigate('Cadastro')} style={styles.linkContainer}>
         <Text style={styles.linkText}>Não tem uma conta? Cadastre-se aqui</Text>
@@ -141,24 +138,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 18,
-  },
-  orText: {
-    fontSize: 16,
-    color: '#7a7a7a',
-    marginVertical: 10,
-  },
-  loginWithText: {
-    fontSize: 16,
-    color: '#3AA6B9',
-    marginBottom: 10,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '60%',
-  },
-  iconButton: {
-    padding: 10,
   },
   linkContainer: {
     marginTop: 20,

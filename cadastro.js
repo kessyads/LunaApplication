@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import axios from 'axios';
 
 const Cadastro = ({ navigation }) => {
   const [nome, setNome] = useState('');
@@ -7,20 +8,17 @@ const Cadastro = ({ navigation }) => {
   const [senha, setSenha] = useState('');
   const [termosAceitos, setTermosAceitos] = useState(false);
 
-  // Valida o formato do email
   const validarEmail = (email) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return re.test(String(email).toLowerCase());
   };
 
-  // Valida a força da senha
   const validarSenha = (senha) => {
     const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; 
     return re.test(senha);
   };
 
-  // Simula o processo de cadastro
-  const handleCadastro = () => {
+  const handleCadastro = async () => {
     if (!nome) {
       Alert.alert('Erro', 'Por favor, insira seu nome.');
       return;
@@ -38,17 +36,26 @@ const Cadastro = ({ navigation }) => {
       return;
     }
 
-    // Simulação de sucesso no cadastro
-    Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-    navigation.navigate('InformacoesIniciais'); // Redireciona para a tela de login
+    try {
+      const response = await axios.post('https://dependable-inspiration-production2.up.railway.app/api/user/signup', {
+        email,
+        senha,
+        nickname: nome,
+        avatar: "default-avatar.png",
+      });
+      if (response.status === 201) {
+        Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+        navigation.navigate('Login');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao realizar cadastro. Tente novamente.');
+      console.error(error);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('./assets/lunalogo.png')}
-        style={styles.icon}
-      />
+      <Image source={require('./assets/lunalogo.png')} style={styles.icon} />
       <Text style={styles.text}>Cadastre-se</Text>
       <TextInput
         placeholder="Digite seu nome..."
@@ -73,15 +80,13 @@ const Cadastro = ({ navigation }) => {
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
 
-      {/* Termos de Uso */}
       <TouchableOpacity onPress={() => setTermosAceitos(!termosAceitos)} style={styles.termosContainer}>
         <Text style={[styles.termosText, termosAceitos && styles.termosTextAceito]}>
           {termosAceitos ? '✔️ Aceitei os termos de uso' : 'Li e concordo com os termos de uso'}
         </Text>
       </TouchableOpacity>
 
-      {/* Link para Login */}
-      <TouchableOpacity onPress={() => navigation.navigate('InformacoesIniciais')} style={styles.linkContainer}>
+      <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkContainer}>
         <Text style={styles.linkText}>Já tem uma conta? Clique aqui</Text>
       </TouchableOpacity>
     </View>

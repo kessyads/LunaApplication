@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 
 const ConfiguracaoPerfil = ({ navigation }) => {
@@ -16,21 +18,19 @@ const ConfiguracaoPerfil = ({ navigation }) => {
     const options = {
       mediaType: 'photo',
     };
-    launchImageLibrary(options, response => {
+    launchImageLibrary(options, (response) => {
       if (response.didCancel) {
         console.log('Usuária cancelou a escolha de imagem');
       } else if (response.errorCode) {
         console.error('Erro ao abrir galeria: ', response.errorMessage);
-      } else {
-        if (response.assets && response.assets.length > 0) {
-          const { uri } = response.assets[0];
-          setAvatarSelecionado({ uri });
-        }
+      } else if (response.assets && response.assets.length > 0) {
+        const { uri } = response.assets[0];
+        setAvatarSelecionado({ uri });
       }
     });
   };
 
-  const handleConfirmar = () => {
+  const handleConfirmar = async () => {
     if (!nickname || !nickname.match(/^[a-zA-Z0-9-_]+$/)) {
       Alert.alert('Erro', 'Por favor, insira um nickname válido com "-" e números.');
       return;
@@ -40,8 +40,22 @@ const ConfiguracaoPerfil = ({ navigation }) => {
       return;
     }
 
-    Alert.alert('Sucesso', 'Perfil configurado com sucesso!');
-    navigation.navigate('TelaAguarde'); 
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await axios.put('https://dependable-inspiration-production2.up.railway.app', {
+        userId,
+        nickname,
+        avatar: avatarSelecionado.uri,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Sucesso', 'Perfil configurado com sucesso!');
+        navigation.navigate('TelaAguarde');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao atualizar perfil.');
+      console.error(error);
+    }
   };
 
   return (

@@ -1,31 +1,42 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Switch } from 'react-native';
-import { Calendar } from 'react-native-calendars'; 
+import { Calendar } from 'react-native-calendars';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app'; // SUBSTITUIR PELA SUA URL DO BACKEND
 
 const UltimoCiclo = ({ navigation }) => {
   const [dataSelecionada, setDataSelecionada] = useState(null);
   const [naoLembro, setNaoLembro] = useState(false);
 
-  const hoje = new Date().toISOString().split('T')[0]; 
+  const hoje = new Date().toISOString().split('T')[0];
 
-  const handleValidar = () => {
+  const handleValidar = async () => {
     if (!dataSelecionada && !naoLembro) {
       Alert.alert('Erro', 'Por favor, selecione uma data ou marque a opção "Não me lembro".');
       return;
     }
-    if (naoLembro) {
-      Alert.alert('Informação', 'Você indicou que não se lembra da data.');
-    } else {
-      Alert.alert('Informação', `Data selecionada: ${dataSelecionada}`);
+
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      await axios.post(`${BASE_URL}/health/update`, {
+        userId,
+        ciclo: 'menstrual',
+        ultimoCiclo: dataSelecionada || 'Indeterminado',
+      });
+
+      Alert.alert('Sucesso', 'Informação do ciclo registrada!');
+      navigation.navigate('Regularidade');
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao registrar o último ciclo. Tente novamente.');
+      console.error('Erro ao registrar o ciclo:', error);
     }
-    navigation.navigate('Regularidade'); 
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Quando foi a data de início do seu último ciclo?</Text>
-
-      {/* Calendário */}
       <Calendar
         onDayPress={(day) => {
           if (day.dateString > hoje) {
@@ -45,16 +56,14 @@ const UltimoCiclo = ({ navigation }) => {
           arrowColor: '#3AA6B9',
           todayTextColor: '#3AA6B9',
         }}
-        maxDate={hoje} 
+        maxDate={hoje}
       />
-
-      {/* Switch */}
       <View style={styles.checkboxContainer}>
         <Switch
           value={naoLembro}
           onValueChange={(newValue) => {
             setNaoLembro(newValue);
-            if (newValue) setDataSelecionada(null);   
+            if (newValue) setDataSelecionada(null);
           }}
           thumbColor={naoLembro ? '#3AA6B9' : '#ccc'}
           trackColor={{ false: '#ccc', true: '#a3dbe9' }}
@@ -62,7 +71,6 @@ const UltimoCiclo = ({ navigation }) => {
         <Text style={styles.checkboxText}>Não me lembro</Text>
       </View>
 
-      {/* Botão Validar */}
       <TouchableOpacity style={styles.button} onPress={handleValidar}>
         <Text style={styles.buttonText}>Validar</Text>
       </TouchableOpacity>

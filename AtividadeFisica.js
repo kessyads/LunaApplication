@@ -25,7 +25,7 @@ const AtividadeFisica = ({ navigation }) => {
     }
 
     Alert.alert('Sucesso', `Intensidade: ${intensidade}\nTipos: ${selecionados.join(', ')}`);
-    navigation.navigate('ConfiguracaoPerfil'); // Substitua com a tela seguinte
+    navigation.navigate('ConfiguracaoPerfil');
   };
 
   return (

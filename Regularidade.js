@@ -1,10 +1,24 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app';
 
 const Regularidade = ({ navigation }) => {
-  const handleResposta = (resposta) => {
+  const handleResposta = async (resposta) => {
     Alert.alert('Resposta selecionada', `Você respondeu: ${resposta}`);
-    navigation.navigate('MetodoContraceptivo'); 
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      await axios.post(`${BASE_URL}/health/update`, {
+        userId,
+        regularidade: resposta,
+      });
+      navigation.navigate('MetodoContraceptivo');
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao registrar a regularidade do ciclo. Tente novamente.');
+      console.error(error);
+    }
   };
 
   return (

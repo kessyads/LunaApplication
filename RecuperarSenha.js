@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import axios from 'axios';
+
+const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app'; 
 
 const RecuperarSenha = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
-  const handleRedefinirSenha = () => {
+  const handleRedefinirSenha = async () => {
     if (!email) {
       Alert.alert('Erro', 'Por favor, insira seu e-mail.');
       return;
@@ -19,8 +22,23 @@ const RecuperarSenha = ({ navigation }) => {
       Alert.alert('Erro', 'As senhas não coincidem.');
       return;
     }
-    Alert.alert('Sucesso', 'Senha redefinida com sucesso!');
-    navigation.navigate('Login'); // Retorna para a tela de login após redefinir
+
+    try {
+      const response = await axios.post(`${BASE_URL}/user/redefinir-senha`, {
+        email,
+        novaSenha,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Sucesso', 'Senha redefinida com sucesso!');
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('Erro', 'Erro ao redefinir senha. Tente novamente.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao redefinir senha. Tente novamente.');
+      console.error('Erro ao redefinir senha:', error);
+    }
   };
 
   return (
@@ -64,7 +82,7 @@ const RecuperarSenha = ({ navigation }) => {
 
       {/* Botão para redefinir senha */}
       <TouchableOpacity style={styles.button} onPress={handleRedefinirSenha}>
-        <Text style={styles.buttonText}>Voltar ao APP</Text>
+        <Text style={styles.buttonText}>Redefinir Senha</Text>
       </TouchableOpacity>
     </View>
   );
