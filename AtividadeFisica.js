@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Checkbox from 'expo-checkbox';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const AtividadeFisica = ({ navigation }) => {
   const [intensidade, setIntensidade] = useState('');
@@ -12,22 +14,42 @@ const AtividadeFisica = ({ navigation }) => {
     Outro: false,
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!intensidade) {
       Alert.alert('Erro', 'Por favor, selecione a intensidade do treino.');
       return;
     }
-
+  
     const selecionados = Object.keys(tiposTreino).filter((tipo) => tiposTreino[tipo]);
     if (selecionados.length === 0) {
       Alert.alert('Erro', 'Por favor, selecione pelo menos um tipo de treino.');
       return;
     }
-
-    Alert.alert('Sucesso', `Intensidade: ${intensidade}\nTipos: ${selecionados.join(', ')}`);
-    navigation.navigate('ConfiguracaoPerfil');
+  
+    const userId = await AsyncStorage.getItem('userId');
+    const token = await AsyncStorage.getItem('token');
+  
+    try {
+      const response = await fetch('http://localhost:5003/api/activity/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          intensidade,
+          tiposTreino: selecionados,
+        }),
+      });
+  
+      if (!response.ok) throw new Error('Erro ao salvar dados de atividade física.');
+      navigation.navigate('TelaAguarde');
+    } catch (error) {
+      Alert.alert('Erro', error.message);
+    }
   };
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Intensidade */}

@@ -1,26 +1,68 @@
-// DashboardCiclo.js
-import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardCiclo = ({ navigation }) => {
-  const nickname = "Amanda";
-  const faseCiclo = "fase folicular";
-  const diaAtual = 15; 
+  const [nickname, setNickname] = useState('');
+  const [faseCiclo, setFaseCiclo] = useState('');
+  const diaAtual = new Date().getDate();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const userId = await AsyncStorage.getItem('userId');
+
+        if (!token || !userId) {
+          Alert.alert('Erro', 'Sessão expirada. Faça login novamente.');
+          return;
+        }
+
+        const userRes = await fetch(`http://localhost:5003/api/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const userData = await userRes.json();
+        setNickname(userData.nickname);
+
+        const healthRes = await fetch(`http://localhost:5003/api/health/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const healthData = await healthRes.json();
+
+        const fase = calcularFaseCiclo(healthData.healthData.dataUltimoCiclo);
+        setFaseCiclo(fase);
+
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        Alert.alert('Erro', 'Falha ao buscar dados. Tente novamente mais tarde.');
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const calcularFaseCiclo = (dataUltimoCiclo) => {
+    const hoje = new Date();
+    const inicioCiclo = new Date(dataUltimoCiclo);
+    const diasDesde = Math.floor((hoje - inicioCiclo) / (1000 * 60 * 60 * 24));
+
+    if (diasDesde <= 5) return 'fase menstrual';
+    if (diasDesde <= 13) return 'fase folicular';
+    if (diasDesde <= 16) return 'fase ovulatória';
+    return 'fase lútea';
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Saudação e Avatar */}
       <View style={styles.header}>
         <Image source={require('./assets/opcao1.png')} style={styles.avatar} />
         <Text style={styles.greeting}>Olá, {nickname}!</Text>
       </View>
 
-      {/* Fase do Ciclo */}
       <Text style={styles.faseText}>
         Você está na <Text style={styles.boldText}>{faseCiclo}</Text> do seu ciclo
       </Text>
 
-      {/* Calendário Simulado */}
       <View style={styles.calendarContainer}>
         {[12, 13, 14, 15, 16, 17].map((day) => (
           <View key={day} style={[styles.day, day === diaAtual && styles.activeDay]}>
@@ -29,20 +71,20 @@ const DashboardCiclo = ({ navigation }) => {
         ))}
       </View>
 
-      {/* Mensagem sobre o Ciclo */}
       <View style={styles.cycleMessageContainer}>
         <Image source={require('./assets/ciclito.png')} style={styles.ciclito} />
         <Text style={styles.cycleMessage}>
-          Você deve se sentir mais disposta e bem humorada hoje!
+          Como você está se sentindo hoje?
         </Text>
       </View>
 
-      {/* Treino Recomendado */}
       <Text style={styles.treinoText}>Confira o treino mais indicado para você hoje:</Text>
       <Image source={require('./assets/mulherTreinando.png')} style={styles.treinoImage} />
 
-      {/* Botão "Ver Meu Treino" */}
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TreinoRecomendado')}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('TreinoRecomendado', { faseCiclo })}
+      >
         <Text style={styles.buttonText}>Ver Meu Treino</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -50,6 +92,7 @@ const DashboardCiclo = ({ navigation }) => {
 };
 
 export default DashboardCiclo;
+
 
 const styles = StyleSheet.create({
   container: {

@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from './home';
 import Cadastro from './cadastro';
+import LGPDScreen from './LGPDScreen';
 import Login from './login';
 import InformacoesIniciais from './InformacoesIniciais';
 import RecuperarSenha from './RecuperarSenha';
@@ -26,6 +27,7 @@ export default function App() {
         <Stack.Screen name="Cadastro" component={Cadastro} options={{ title: 'Cadastro' }} />
         <Stack.Screen name="Login" component={Login} options={{ title: 'Login' }} />
         <Stack.Screen name="RecuperarSenha" component={RecuperarSenha} options={{ title: 'Recuperar Senha' }} />
+        <Stack.Screen name="LGPDScreen" component={LGPDScreen} />
         <Stack.Screen name="InformacoesIniciais" component={InformacoesIniciais} options={{ title: 'Informações Iniciais' }} />
         <Stack.Screen name="UltimoCiclo" component={UltimoCiclo} options={{ title: 'Último Ciclo' }} />
         <Stack.Screen name="Regularidade" component={Regularidade} options={{ title: 'Regularidade' }} />

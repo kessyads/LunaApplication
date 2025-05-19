@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 
-const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app'; 
+const BASE_URL = 'http://localhost:5003'; 
 
 const RecuperarSenha = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -48,7 +48,6 @@ const RecuperarSenha = ({ navigation }) => {
         Digite seu <Text style={styles.highlight}>email</Text> para redefinir sua senha:
       </Text>
 
-      {/* Campo de Email */}
       <TextInput
         style={styles.input}
         placeholder="Digite seu e-mail..."
@@ -57,7 +56,6 @@ const RecuperarSenha = ({ navigation }) => {
         keyboardType="email-address"
       />
 
-      {/* Campo de Nova Senha */}
       <Text style={styles.label}>Nova senha:</Text>
       <Text style={styles.instructions}>
         *Insira maiúsculas, caracteres especiais (*&%$) e números.
@@ -70,7 +68,6 @@ const RecuperarSenha = ({ navigation }) => {
         secureTextEntry
       />
 
-      {/* Campo de Confirmação de Senha */}
       <Text style={styles.label}>Confirmar:</Text>
       <TextInput
         style={styles.input}
@@ -80,7 +77,6 @@ const RecuperarSenha = ({ navigation }) => {
         secureTextEntry
       />
 
-      {/* Botão para redefinir senha */}
       <TouchableOpacity style={styles.button} onPress={handleRedefinirSenha}>
         <Text style={styles.buttonText}>Redefinir Senha</Text>
       </TouchableOpacity>

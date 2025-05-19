@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Image, TouchableOpacity, Platform, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const InformacoesIniciais = ({ navigation }) => {
   const [dataNascimento, setDataNascimento] = useState('');
@@ -19,28 +17,14 @@ const InformacoesIniciais = ({ navigation }) => {
     setShowDatePicker(false);
   };
 
-  const handleAvancar = async () => {
+  const handleAvancar = () => {
     if (!dataNascimento || !peso || !altura) {
       Alert.alert('Erro', 'Por favor, preencha todas as informações.');
       return;
     }
 
-    try {
-      const userId = await AsyncStorage.getItem('userId');
-      await axios.post('dependable-inspiration-production2.up.railway.app', {
-        userId,
-        ciclo: 'menstrual', 
-        peso,
-        altura,
-        dataNascimento,
-      });
-
-      Alert.alert('Sucesso', 'Informações salvas com sucesso!');
-      navigation.navigate('UltimoCiclo');
-    } catch (error) {
-      Alert.alert('Erro', 'Erro ao salvar informações de saúde. Tente novamente.');
-      console.error(error);
-    }
+    Alert.alert('Sucesso', 'Informações salvas com sucesso!');
+    navigation.navigate('UltimoCiclo');
   };
 
   return (

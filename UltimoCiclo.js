@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert, Switch } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app'; // SUBSTITUIR PELA SUA URL DO BACKEND
+const BASE_URL = 'http://localhost:5003';
 
 const UltimoCiclo = ({ navigation }) => {
   const [dataSelecionada, setDataSelecionada] = useState(null);
@@ -13,24 +12,46 @@ const UltimoCiclo = ({ navigation }) => {
   const hoje = new Date().toISOString().split('T')[0];
 
   const handleValidar = async () => {
+    const userId = await AsyncStorage.getItem('userId');
+    const token = await AsyncStorage.getItem('token');
+
+    console.log('🔐 Token:', token);
+    console.log('🆔 userId:', userId);
+
+    if (!userId || !token) {
+      Alert.alert('Erro', 'Você precisa estar logada para continuar.');
+      return;
+    }
+
     if (!dataSelecionada && !naoLembro) {
-      Alert.alert('Erro', 'Por favor, selecione uma data ou marque a opção "Não me lembro".');
+      Alert.alert('Erro', 'Por favor, selecione uma data ou marque "Não me lembro".');
       return;
     }
 
     try {
-      const userId = await AsyncStorage.getItem('userId');
-      await axios.post(`${BASE_URL}/health/update`, {
-        userId,
-        ciclo: 'menstrual',
-        ultimoCiclo: dataSelecionada || 'Indeterminado',
+      const response = await fetch(`${BASE_URL}/api/health/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          dataUltimoCiclo: naoLembro ? null : dataSelecionada,
+        }),
       });
 
-      Alert.alert('Sucesso', 'Informação do ciclo registrada!');
+      if (!response.ok) {
+        const erro = await response.json();
+        console.log('Erro ao salvar:', erro);
+        throw new Error(erro.message || 'Erro ao salvar dados.');
+      }
+
+      Alert.alert('Sucesso', 'Ciclo registrado com sucesso!');
       navigation.navigate('Regularidade');
     } catch (error) {
-      Alert.alert('Erro', 'Erro ao registrar o último ciclo. Tente novamente.');
-      console.error('Erro ao registrar o ciclo:', error);
+      console.error('Erro ao salvar ciclo:', error.message);
+      Alert.alert('Erro', error.message);
     }
   };
 
@@ -40,7 +61,7 @@ const UltimoCiclo = ({ navigation }) => {
       <Calendar
         onDayPress={(day) => {
           if (day.dateString > hoje) {
-            Alert.alert('Erro', 'A data selecionada não pode ser no futuro.');
+            Alert.alert('Erro', 'A data não pode ser no futuro.');
           } else {
             setDataSelecionada(day.dateString);
           }
@@ -58,6 +79,7 @@ const UltimoCiclo = ({ navigation }) => {
         }}
         maxDate={hoje}
       />
+
       <View style={styles.checkboxContainer}>
         <Switch
           value={naoLembro}

@@ -1,26 +1,33 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'https://dependable-inspiration-production2.up.railway.app'; 
 
 const MetodoContraceptivo = ({ navigation }) => {
   const handleSelection = async (metodo) => {
-    Alert.alert('Método selecionado', `Você selecionou: ${metodo}`);
+    const userId = await AsyncStorage.getItem('userId');
+    const token = await AsyncStorage.getItem('token');
+  
     try {
-      const userId = await AsyncStorage.getItem('userId');
-      await axios.post(`${BASE_URL}/health/update`, {
-        userId,
-        metodoContraceptivo: metodo,
+      const response = await fetch('http://localhost:5003/api/health/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          metodoContraceptivo: metodo,
+        }),
       });
-      navigation.navigate('RotinaTreinos');
+  
+      if (!response.ok) throw new Error('Erro ao salvar método contraceptivo.');
+      navigation.navigate('AtividadeFisica');
     } catch (error) {
-      Alert.alert('Erro', 'Erro ao registrar o método contraceptivo. Tente novamente.');
-      console.error('Erro ao registrar o método contraceptivo:', error);
+      Alert.alert('Erro', error.message);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Qual método contraceptivo você utiliza?</Text>
@@ -61,6 +68,7 @@ const MetodoContraceptivo = ({ navigation }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
